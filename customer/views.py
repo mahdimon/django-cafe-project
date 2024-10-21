@@ -1,6 +1,8 @@
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from core.models import Item
+from .forms import PurchaseForm
+from .models import Customer ,Order,OrderItem
 
 class Menu(View):
     def get(self , request):
@@ -12,59 +14,44 @@ class Cart(View):
     def get(self, request):
         cart_item_ids = map(int, request.session.get('cart', {}).keys())
         cart_items = Item.objects.filter(id__in=cart_item_ids)
-        return render(request, 'customer/cart.html',{'items':cart_items})
+        form = PurchaseForm()
+        return render(request, 'customer/cart.html',{'items':cart_items, "form":form})
 
-    def post(self, request, action):
-        """Handle cart actions."""
-        if action == "add":
-            item_id = request.POST.get('item_id')
-            item = get_object_or_404(Item, id=item_id)
+def post(self, request, action):
+    form = PurchaseForm(request.POST)
+    if action == "buy" and form.is_valid():
+        cart = request.session.get('cart', {})
+        phone_number = form.cleaned_data.get('phone_number', None)
 
-            cart, created = ShoppingCart.objects.get_or_create(customer=request.user if request.user.is_authenticated else None)
-            cart_item, created = CartItem.objects.get_or_create(cart=cart, item=item)
+        customer_id = request.session.get('customer_id')
+    
+        if customer_id:
+            try:
+                customer = Customer.objects.get(id=customer_id)
+            except Customer.DoesNotExist:
+                customer = None  
+        
 
-            if not created:
-                cart_item.quantity += 1
-            cart_item.save()
+        if not customer:
+            customer, created = Customer.objects.get_or_create(phone_number=phone_number)
+            request.session['customer_id'] = customer.pk  # Store new customer ID in session
 
-        elif action == "update":
-            cart_item_id = request.POST.get('cart_item_id')
-            quantity = int(request.POST.get('quantity', 1))
-            cart_item = get_object_or_404(CartItem, id=cart_item_id)
+        # Create the order
+        order = Order.objects.create(customer=customer)
 
-            if quantity <= 0:
-                cart_item.delete()
-            else:
-                cart_item.quantity = quantity
-                cart_item.save()
+        for item_id, quantity in cart.items():
+            item = Item.objects.filter(id=item_id).first()
+            if not item:
+                continue
+            OrderItem.objects.create(order=order, item=item, quantity=quantity)
 
-        elif action == "remove":
-            cart_item_id = request.POST.get('cart_item_id')
-            cart_item = get_object_or_404(CartItem, id=cart_item_id)
-            cart_item.delete()
+        request.session['cart'] = {}  # Clear the cart after purchase
 
-        return redirect('view_cart')  # Redirect to the cart view
-def place_order_view(request):
-    if not request.session.session_key:
-        request.session.create()
+        return redirect('customer/success.html', order_id=order.id)
 
-    session_key = request.session.session_key
-    if request.method == 'POST':
-        phone_number = request.POST.get('phone_number', '')
-
-        # Create or get the customer (optional phone number)
-        if phone_number:
-            customer, created = Customer.objects.get_or_create(
-                phone_number=phone_number)
-        else:
-            customer = None
-
-        order = Order.objects.create(
-            customer=customer,
-            session_key=session_key,
-            order_details=request.POST['order_details']
-        )
-
-        return redirect('order_success')
-
-    return render(request, 'place_order.html')
+    else:
+        self.get(request)
+        
+ 
+def success(request):
+    pass
