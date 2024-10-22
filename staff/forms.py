@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from core.models import Item
+from customer.models import Order
 
 class StaffCreationForm(UserCreationForm):
     class Meta:
@@ -29,3 +31,10 @@ class StaffUpdateForm(forms.ModelForm):
             user.save()
         return user
     
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['customer', 'items', 'table_number', 'status']
+        widgets = {
+            'items': forms.CheckboxSelectMultiple(),
+        }

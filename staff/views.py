@@ -5,6 +5,11 @@ from django.contrib import messages
 from .forms import StaffCreationForm, StaffUpdateForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.views.generic import TemplateView, ListView, UpdateView, CreateView, DeleteView
+from customer.models import Order
+from django.db.models import Q
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 @login_required
 def staff_list(request):
@@ -57,16 +62,62 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'staff/login.html', {'form': form})
 
-@login_required
-def home(request):
-    return render(request, 'staff/home.html')
+class StaffDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'staff/dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['last_orders'] = Order.objects.all().order_by('-order_date')[:5]
+        return context
 
 @login_required
 def orders_view(request):
-    # Your logic for handling orders goes here
-    return render(request, 'orders.html')
+    orders = Order.objects.all()
+    return render(request, 'staff/orders.html', {'orders': orders})
 
 @login_required
 def logout_view(request):
     logout(request)
     return redirect('staff:login')
+
+class OrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'staff/orders.html'  # Updated to reflect the merged template
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        queryset = Order.objects.all()
+        status = self.request.GET.get('status')
+        table_number = self.request.GET.get('table_number')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+
+        if status:
+            queryset = queryset.filter(status=status)
+        if table_number:
+            queryset = queryset.filter(table_number=table_number)
+        if start_date and end_date:
+            queryset = queryset.filter(order_date__range=[start_date, end_date])
+
+        return queryset
+
+class OrderEditView(LoginRequiredMixin, UpdateView):
+    model = Order
+    fields = ['status', 'table_number']  # You can extend this based on your requirements
+    template_name = 'staff/order_edit.html'
+    success_url = reverse_lazy('staff:orders')
+
+class OrderCreateView(LoginRequiredMixin, CreateView):
+    model = Order
+    template_name = 'staff/order_form.html'  # Adjust the template name as needed
+    fields = '__all__'  # Adjust fields as necessary
+
+class OrderUpdateView(LoginRequiredMixin, UpdateView):
+    model = Order
+    template_name = 'staff/order_form.html'  # Adjust the template name as needed
+    fields = '__all__'  # Adjust fields as necessary
+
+class OrderDeleteView(LoginRequiredMixin, DeleteView):
+    model = Order
+    template_name = 'staff/order_confirm_delete.html'  # Adjust the template name as needed
+    success_url = '/staff/orders/'  # Redirect after deletion
