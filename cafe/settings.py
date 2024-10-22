@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +26,7 @@ SECRET_KEY = "django-insecure-eqi#i9_%r4x!0=i*twn*f8zg3&=8^ujd*bw6(@l#&eif%99h=y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['85.133.205.81', '127.0.0.1', 'localhost', '0.0.0.0']
 
 
 # Application definition
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'core',
     'customer',
+    'staff',
 ]
 
 MIDDLEWARE = [
@@ -56,7 +58,7 @@ ROOT_URLCONF = "cafe.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -75,23 +77,23 @@ WSGI_APPLICATION = "cafe.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-# 'default': {
-# 'ENGINE': 'django.db.backends.postgresql',
-# 'NAME':'cafe_dev',
-# 'USER': 'postgres',
-# 'PASSWORD': 'maktab116-1',
-# 'HOST': '85.133.205.81',
-# 'PORT': '5432'
-# }
-# }
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+'default': {
+'ENGINE': 'django.db.backends.postgresql',
+'NAME':'cafe_dev',
+'USER': 'postgres',
+'PASSWORD': 'maktab116-1',
+'HOST': '85.133.205.81',
+'PORT': '5432'
 }
+}
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Password validation
