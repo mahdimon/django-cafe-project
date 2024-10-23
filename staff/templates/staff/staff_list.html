@@ -4,18 +4,27 @@
 
 {% block content %}
 <h2>Staff List</h2>
-<a class="btn btn-primary mb-3" href="{% url 'staff:create_staff' %}">Create New Staff</a>
+<a 
+    class="btn btn-primary mb-3" 
+    href="{% url 'staff:create_staff' %}" 
+    title="{% if request.user.is_staff %}Create a new staff member{% else %}You do not have permission to create a staff member{% endif %}"
+    {% if not request.user.is_staff %}style="pointer-events: none; opacity: 0.5;"{% endif %}
+>
+    Create New Staff
+</a>
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Username</th>
+            <th>Email</th> <!-- Assuming you're using email instead of username -->
+            <th>Staff Status</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for staff in staff_members %}
         <tr>
-            <td>{{ staff.username }}</td>
+            <td>{{ staff.email }}</td> <!-- Displaying email -->
+            <td>{{ staff.is_staff|yesno:"Yes,No" }}</td> <!-- Show Yes if staff, No otherwise -->
             <td>
                 <a class="btn btn-warning btn-sm" href="{% url 'staff:update_staff' staff.id %}">Edit</a>
                 <a class="btn btn-danger btn-sm" href="{% url 'staff:delete_staff' staff.id %}">Delete</a>

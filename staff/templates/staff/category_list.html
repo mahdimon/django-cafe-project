@@ -1,0 +1,31 @@
+{% extends 'base-s.html' %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<h2>Categories</h2>
+<a href="{% url 'staff:create_category' %}" class="btn btn-primary mb-3">Create New Category</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.name }}</td>
+            <td>{{ category.description }}</td>
+            <td>
+                <a href="{% url 'staff:update_category' category.pk %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'staff:category_confirm_delete' category.pk %}" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
