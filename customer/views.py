@@ -15,19 +15,20 @@ class Cart(View):
     def get(self, request):
         cart_cookie = request.COOKIES.get('cart', '{}')
         cart = json.loads(cart_cookie)
-        cart_item_ids = map(int, cart.keys())
+        cart_item_ids = list(map(int, cart.keys()))
         cart_items = Item.objects.filter(id__in=cart_item_ids)
         form = PurchaseForm()
-        return render(request, 'customer/cart.html',{'cart_items':cart_items, "form":form})
+        cart = {int(key): str(value) for key, value in cart.items()}
+        return render(request, 'customer/cart.html',{'cart_items':cart_items, "form":form,'cart':cart})
 
-    def post(self, request, action):
+    def post(self, request):
         form = PurchaseForm(request.POST)
         if form.is_valid():
-            cart = request.session.get('cart', {})
             phone_number = form.cleaned_data.get('phone_number', None)
             customer_id = request.session.get('customer_id')
-            cart_cookie = request.COOKIES.get('cart')
+            cart_cookie = request.COOKIES.get('cart',{})
             cart = json.loads(cart_cookie)
+            customer = None
             if customer_id:
                 
                 try:
@@ -38,18 +39,21 @@ class Cart(View):
 
             if not customer:
                 customer, created = Customer.objects.get_or_create(phone_number=phone_number)
+                customer.save()
                 request.session['customer_id'] = customer.pk 
 
             
             order = Order.objects.create(customer=customer)
-            total_price = 0
+            
+            order.price = 0
+            order.save()
             for item_id, quantity in cart.items():
                 item = Item.objects.get(id=item_id)
                 if not item or quantity < 1:
                     continue
-                total_price += int(item.price)
+                order.price += int(item.price)*quantity
                 OrderItem.objects.create(order=order, item=item, quantity=quantity)
-            order.price = total_price
+            
             order.save()
             response = redirect('checkout',order_id = order.id) 
             response.set_cookie('cart', '')  

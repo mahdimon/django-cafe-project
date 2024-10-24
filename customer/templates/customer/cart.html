@@ -3,6 +3,8 @@
 {% block title %}Cart{% endblock %}
 
 {% block content %}
+{% load custom_filters %}
+</script>
 <h1 class="my-4">Cart</h1>
 {% if cart_items %}
     <table class="table">
@@ -10,6 +12,7 @@
             <tr>
                 <th scope="col">Item</th>
                 <th scope="col">Price</th>
+                <th scope="col">count</th>
             </tr>
         </thead>
         <tbody>
@@ -17,11 +20,16 @@
             <tr>
                 <td>{{ item.name }}</td>
                 <td>${{ item.price }}</td>
+                {% with key=item.id %}
+                <td>{{ cart|dictitem:key }}</td> 
+                {% endwith %}
+
+               
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <form action="{% url 'checkout' %}" method="post" class="mt-4">
+    <form action="{% url 'cart' %}" method="post" class="mt-4">
         {% csrf_token %}
         {{ form.as_p }}
         
