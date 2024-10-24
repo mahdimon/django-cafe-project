@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu{% endblock %}
+
+{% block content %}
+<script>
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+
+    // Function to get a cookie by name
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    // Function to update the cart in the cookie
+    function updateCart(itemId, itemCount) {
+        let cart = getCookie("cart");
+        cart = cart ? JSON.parse(cart) : {};  // Get existing cart or create a new one
+
+        if (itemCount > 0) {
+            cart[itemId] = itemCount;  // Add/update item in the cart
+        } else {
+            delete cart[itemId];  // Remove item if count is 0
+        }
+
+        setCookie("cart", JSON.stringify(cart), 365);  // Set cookie to last 1 year
+    }
+
+    // Function to handle adding an item to the cart and updating the button
+    function addToCart(itemId) {
+        let cart = getCookie("cart");
+        cart = cart ? JSON.parse(cart) : {};
+
+        let itemCount = cart[itemId] ? cart[itemId] + 1 : 1;  // Increment or add new
+        updateCart(itemId, itemCount);
+
+        // Change the button to show +, - and count
+        const button = document.getElementById(`add-to-cart-${itemId}`);
+        button.innerHTML = `
+            <button onclick="changeItemCount(${itemId}, -1)">-</button>
+            <span id="item-count-${itemId}">${itemCount}</span>
+            <button onclick="changeItemCount(${itemId}, 1)">+</button>
+        `;
+    }
+
+    // Function to change item count (+ or -) in the cart
+    function changeItemCount(itemId, change) {
+        let cart = getCookie("cart");
+        cart = cart ? JSON.parse(cart) : {};
+
+        let itemCount = cart[itemId] ? cart[itemId] + change : change;
+        itemCount = itemCount < 0 ? 0 : itemCount;  // Prevent negative count
+
+        updateCart(itemId, itemCount);
+
+        // Update the displayed count or restore "Add to Cart" if 0
+        const itemCountElement = document.getElementById(`item-count-${itemId}`);
+        if (itemCount > 0) {
+            itemCountElement.innerText = itemCount;
+        } else {
+            const button = document.getElementById(`add-to-cart-${itemId}`);
+            button.innerHTML = `<button onclick="addToCart(${itemId})">Add to Cart</button>`;
+        }
+    }
+</script>
+
+<h1 class="my-4">Menu</h1>
+<div class="row">
+    {% if menu_items %}
+        {% for item in menu_items %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <p class="card-text">{{ item.description }}</p>
+                    <p class="card-text">${{ item.price }}</p>
+                    <div id="add-to-cart-{{ item.id }}">
+                        <button class="btn btn-primary" onclick="addToCart({{ item.id }})">Add to Cart</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No items available in the menu.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -11,8 +11,8 @@ class Customer(models.Model):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey('Order', on_delete=models.CASCADE)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE,related_name="order_items")
+    item = models.ForeignKey(Item, on_delete=models.CASCADE,related_name="order_items")
     quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
@@ -26,12 +26,13 @@ class Order(models.Model):
         ('canceled', 'Canceled'),
     ]
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True,related_name="orders")
     items = models.ManyToManyField(Item, through='OrderItem', related_name='orders')
     items_info = models.JSONField(null=True, blank=True)
     table_number = models.PositiveIntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     order_date = models.DateTimeField(auto_now_add=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
 
     def __str__(self):
         return f"Order {self.id} for Table {self.table_number} ({self.get_status_display()})"
