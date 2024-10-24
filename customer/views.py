@@ -56,7 +56,7 @@ class Cart(View):
             
             order.save()
             response = redirect('checkout',order_id = order.id) 
-            response.set_cookie('cart', '')  
+            response.delete_cookie("cart")
 
             return response
 
@@ -65,7 +65,7 @@ class Cart(View):
             
     
 def checkout(request,order_id):
-    return render("checkout",{"order_id" : order_id})
+    return render(request,"customer/checkout.html",{'order_id':order_id})
 
 def history(request):
     customer_id = request.session.get('customer_id')
