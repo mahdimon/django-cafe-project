@@ -74,5 +74,5 @@ def history(request):
             customer = Customer.objects.get(id=customer_id)
         except Customer.DoesNotExist:
             customer = None 
-    orders = customer.orders
-    render("history",{'orders':orders})
+    orders = customer.orders.all()
+    return render(request,"customer/history.html",{'orders':orders})
