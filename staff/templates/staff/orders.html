@@ -51,8 +51,8 @@
                 <td>{{ order.status }}</td>
                 <td>{{ order.order_date }}</td>
                 <td>
-                    <a href="{% url 'staff:edit_order' order.id %}" class="btn btn-warning">Edit</a>
-                    <a href="{% url 'staff:delete_order' order.id %}" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'staff:order_edit' order.id %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'staff:order_delete' order.id %}" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
             {% empty %}
