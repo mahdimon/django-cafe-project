@@ -33,6 +33,7 @@ def create_staff(request):
         form = StaffCreationForm()
     return render(request, 'staff/create_staff.html', {'form': form})
 
+
 @login_required
 @user_passes_test(lambda u: u.is_staff)
 def update_staff(request, staff_id):
@@ -46,6 +47,7 @@ def update_staff(request, staff_id):
     else:
         form = StaffUpdateForm(instance=user)
     return render(request, 'staff/update_staff.html', {'form': form})
+
 
 @login_required
 def delete_staff(request, staff_id):
@@ -90,7 +92,7 @@ def logout_view(request):
 
 class OrderListView(LoginRequiredMixin, ListView):
     model = Order
-    template_name = 'staff/orders.html'  # Updated to reflect the merged template
+    template_name = 'staff/orders.html'
     context_object_name = 'orders'
 
     def get_queryset(self):
@@ -99,6 +101,7 @@ class OrderListView(LoginRequiredMixin, ListView):
         table_number = self.request.GET.get('table_number')
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
+        phone_number = self.request.GET.get('phone_number')
 
         if status:
             queryset = queryset.filter(status=status)
@@ -106,8 +109,11 @@ class OrderListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(table_number=table_number)
         if start_date and end_date:
             queryset = queryset.filter(order_date__range=[start_date, end_date])
+        if phone_number:
+            queryset = queryset.filter(phone_number__icontains=phone_number)
 
         return queryset
+
 
 class OrderEditView(LoginRequiredMixin, UpdateView):
     model = Order

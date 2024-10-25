@@ -6,43 +6,46 @@ from customer.models import Order, Customer
 
 class StaffCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     is_staff = forms.BooleanField(required=False, label='Is Staff', widget=forms.CheckboxInput())
 
     class Meta:
         model = User
-        fields = ['email', 'password1', 'password2', 'is_staff']  # Email instead of username, with is_staff option
+        fields = ['username', 'email', 'password1', 'password2', 'is_staff']  # Include username field
 
     def save(self, commit=True):
         user = super(StaffCreationForm, self).save(commit=False)
         user.email = self.cleaned_data['email']
-        user.username = self.cleaned_data['email']  # Optional: use email as username
-        user.is_staff = self.cleaned_data['is_staff']  # Allows setting is_staff from the form
+        user.username = self.cleaned_data['username']  # Use the entered username
+        user.is_staff = self.cleaned_data['is_staff']
         if commit:
             user.save()
         return user
 
+
 class StaffUpdateForm(forms.ModelForm):
+    username = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-control'}), help_text='Leave blank if no change.')
+    password = forms.CharField(
+        required=False, 
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}), 
+        help_text='Leave blank if no change.'
+    )
     is_staff = forms.BooleanField(required=False, label='Is Staff', widget=forms.CheckboxInput())
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'is_staff']  # Use email instead of username, and add is_staff
-        widgets = {
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'password': forms.PasswordInput(attrs={'class': 'form-control'}),
-        }
+        fields = ['username', 'email', 'password', 'is_staff']  # Include username
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        if 'password' in self.cleaned_data and self.cleaned_data['password']:
+        if self.cleaned_data['password']:
             user.set_password(self.cleaned_data['password'])  # Hash the new password if provided
-        user.username = self.cleaned_data['email']  # Ensure the username is the email
-        user.is_staff = self.cleaned_data['is_staff']  # Update is_staff based on form input
+        user.is_staff = self.cleaned_data['is_staff']
         if commit:
             user.save()
         return user
+
     
 class OrderCreateForm(forms.ModelForm):
     phone_number = forms.CharField(
