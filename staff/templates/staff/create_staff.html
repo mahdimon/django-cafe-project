@@ -1,0 +1,13 @@
+{% extends 'base-s.html' %}
+
+{% block title %}Create Staff Account{% endblock %}
+
+{% block content %}
+<h2>Create Staff Account</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Create Staff</button>
+</form>
+<a class="btn btn-secondary mt-3" href="{% url 'staff:staff_list' %}">Back to Staff List</a>
+{% endblock %}

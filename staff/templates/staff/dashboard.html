@@ -1,0 +1,29 @@
+{% extends "base-s.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Staff Dashboard</h1>
+    <h2>Last 5 Orders</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Table Number</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in last_orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.get_status_display }}</td>
+                <td>{{ order.table_number }}</td>
+                <td>{{ order.order_date }}</td>
+                <td><a href="{% url 'staff:edit_order' order.id %}" class="btn btn-primary">Edit</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

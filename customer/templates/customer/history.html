@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+ {% block content %}
+<h1 class="my-4">Order History</h1>
+{% if orders %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">order date</th>
+                <th scope="col">Items</th>
+                <th scope="col">Total Price</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_date|date:"Y-m-d" }}</td>
+                <td>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Item Name</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order_item in order.order_items.all %}
+                            <tr>
+                                <td>{{ order_item.item.name }}</td> 
+                                <td>${{ order_item.item.price }}</td> 
+                                <td>{{ order_item.quantity }}</td>
+                            </tr>
+                            <br>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+                <td>${{ order.price }}</td> 
+                <td>{{ order.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have no orders in your history!</p>
+{% endif %}
+{% endblock %} 

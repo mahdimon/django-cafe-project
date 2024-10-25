@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+{% load custom_filters %}
+</script>
+<h1 class="my-4">Cart</h1>
+{% if cart_items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Item</th>
+                <th scope="col">Price</th>
+                <th scope="col">count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>${{ item.price }}</td>
+                {% with key=item.id %}
+                <td>{{ cart|dictitem:key }}</td> 
+                {% endwith %}
+
+               
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form action="{% url 'cart' %}" method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn btn-success">Complete Order</button>
+    </form>
+    
+{% else %}
+    <p>Your cart is empty!</p>
+{% endif %}
+{% endblock %}

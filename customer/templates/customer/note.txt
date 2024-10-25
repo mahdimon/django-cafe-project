@@ -1,0 +1,18 @@
+/root = menu
+menu (
+navbar : cart, order history, home buttom
+items: img, title, desc, price, add to cart
+) 
+
+/cart
+cart (
+added items in table form ( removoable)
+complete order button --> checkout
+) 
+
+/orderhistory
+
+orderhistroy ( order histrory in table from )
+/checkout (
+result of the complete order button ( successfull message or error failed )
+)

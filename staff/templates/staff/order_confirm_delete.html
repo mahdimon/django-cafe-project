@@ -1,0 +1,12 @@
+
+{% extends 'base-s.html' %}
+
+{% block content %}
+<h2>Delete Order</h2>
+<p>Are you sure you want to delete "{{ object }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a href="{% url 'staff:orders' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
