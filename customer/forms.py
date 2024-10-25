@@ -1,5 +1,6 @@
 from django import forms
 import re
+from core.models import Category
 
 
 class PurchaseForm(forms.Form):
@@ -19,3 +20,11 @@ class PurchaseForm(forms.Form):
                 raise forms.ValidationError('Please enter a valid 11-digit phone number starting with 09.')
 
         return phone_number 
+    
+class CategoryFilterForm(forms.Form):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=False, 
+        label="Filter by Category",
+        widget=forms.Select(attrs={'class': 'form-control'}) 
+    )

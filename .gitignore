@@ -8,10 +8,10 @@
 *.whl
 
 # Django
-*/migrations
+*/migrations/
 *.sqlite3
 db.sqlite3
-media/
+
 staticfiles/
 *.log
 

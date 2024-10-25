@@ -1,4 +1,5 @@
-{% block content %}
+{% extends 'base.html' %}
+ {% block content %}
 <h1 class="my-4">Order History</h1>
 {% if orders %}
     <table class="table">
@@ -19,8 +20,9 @@
                         <thead>
                             <tr>
                                 <th scope="col">Item Name</th>
-                                <th scope="col">Quantity</th>
                                 <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                
                                 
                             </tr>
                         </thead>
@@ -31,6 +33,7 @@
                                 <td>${{ order_item.item.price }}</td> 
                                 <td>{{ order_item.quantity }}</td>
                             </tr>
+                            <br>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -44,4 +47,4 @@
 {% else %}
     <p>You have no orders in your history!</p>
 {% endif %}
-{% endblock %}
+{% endblock %} 

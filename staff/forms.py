@@ -80,13 +80,12 @@ class OrderCreateForm(forms.ModelForm):
             order.save()  # Save the order first to assign an ID
         return order
 
-
 class OrderEditForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ['items', 'table_number', 'status']  # Include fields that can be edited
         widgets = {
-            'items': forms.CheckboxSelectMultiple(),
+            'items': forms.CheckboxSelectMultiple(choices=Item.objects.all().values("name")),
             'table_number': forms.NumberInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
