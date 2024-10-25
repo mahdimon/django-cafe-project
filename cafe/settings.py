@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-
+from dotenv import load_dotenv
+# Load environment variables from the .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-eqi#i9_%r4x!0=i*twn*f8zg3&=8^ujd*bw6(@l#&eif%99h=y"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,9 +85,9 @@ DATABASES = {
 'ENGINE': 'django.db.backends.postgresql',
 'NAME':'cafe_dev',
 'USER': 'postgres',
-'PASSWORD': 'maktab116-1',
-'HOST': '85.133.205.81',
-'PORT': '5432'
+'PASSWORD': os.getenv("db_password"),
+'HOST': os.getenv("db_host"),
+'PORT': os.getenv("db_port")
 }
 }
 
