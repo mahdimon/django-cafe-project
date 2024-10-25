@@ -1,7 +1,7 @@
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from core.models import Item
-from .forms import PurchaseForm
+from .forms import PurchaseForm ,CategoryFilterForm
 from .models import Customer ,Order,OrderItem
 import json
 
@@ -9,8 +9,14 @@ class Menu(View):
     def get(self , request):
         if not request.session.session_key:
             request.session.create()
+        form = CategoryFilterForm(request.GET or None)
         items = Item.objects.filter(available=True)
-        return render(request,"customer/menu.html",{'menu_items':items})
+        if form.is_valid():
+            category = form.cleaned_data.get('category')
+            if category:
+                items = items.filter(category=category)
+        
+        return render(request,"customer/menu.html",{'menu_items':items,'form':form})
 class Cart(View):
     def get(self, request):
         cart_cookie = request.COOKIES.get('cart', '{}')
@@ -51,7 +57,8 @@ class Cart(View):
                 item = Item.objects.get(id=item_id)
                 if not item or quantity < 1:
                     continue
-                order.price += int(item.price)*quantity
+                
+                order.price += float(item.price) * int(quantity)
                 OrderItem.objects.create(order=order, item=item, quantity=quantity)
             
             order.save()
@@ -69,10 +76,11 @@ def checkout(request,order_id):
 
 def history(request):
     customer_id = request.session.get('customer_id')
+    orders = None
     if customer_id:
         try:
             customer = Customer.objects.get(id=customer_id)
+            orders = customer.orders.all()
         except Customer.DoesNotExist:
-            customer = None 
-    orders = customer.orders.all()
+            pass
     return render(request,"customer/history.html",{'orders':orders})

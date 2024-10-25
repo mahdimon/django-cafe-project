@@ -76,6 +76,10 @@
 </script>
 
 <h1 class="my-4">Menu</h1>
+<form method="GET" action="{% url 'menu' %}" class="mb-4">
+    {{ form.as_p }}  
+    <button type="submit" class="btn btn-primary mt-2">Filter</button>
+</form>
 <div class="row">
     {% if menu_items %}
         {% for item in menu_items %}

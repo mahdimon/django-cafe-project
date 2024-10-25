@@ -1,3 +1,4 @@
+{% extends 'base.html' %}
  {% block content %}
 <h1 class="my-4">Order History</h1>
 {% if orders %}
@@ -19,8 +20,9 @@
                         <thead>
                             <tr>
                                 <th scope="col">Item Name</th>
-                                <th scope="col">Quantity</th>
                                 <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                
                                 
                             </tr>
                         </thead>
