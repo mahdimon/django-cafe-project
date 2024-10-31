@@ -24,18 +24,32 @@
             {% for item in items %}
                 <div class="form-check">
                     <!-- Checkbox to select the item -->
-                    <input class="form-check-input" type="checkbox" id="item_{{ item.id }}" name="items" value="{{ item.id }}" 
-                    {% if object and item in object.items.all %}checked{% endif %}>  <!-- Pre-check selected items if editing -->
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           id="item_{{ item.id }}" 
+                           name="items" 
+                           value="{{ item.id }}" 
+                           data-item-id="{{ item.id }}"
+                           {% if object and item in object.items.all %}checked{% endif %}
+                           onchange="toggleQuantityInput(this)">
+                    
                     <label class="form-check-label" for="item_{{ item.id }}">
                         {{ item.name }} - ${{ item.price }}
                     </label>
                     
                     <!-- Quantity input for each item -->
-                    <input type="number" name="quantities" min="1" value="1" class="form-control quantity-input" style="width: 100px; display: inline;" placeholder="Quantity">
+                    <input type="number" 
+                           name="quantities" 
+                           min="1" 
+                           value="1" 
+                           class="form-control quantity-input"
+                           id="quantity_{{ item.id }}"
+                           style="width: 100px; display: none;"
+                           placeholder="Quantity">
                 </div>
             {% endfor %}
         </div>
-        {{ form.items.errors }}  <!-- Handle any errors for item selection -->
+        {{ form.items.errors }}
     </div>
 
     <!-- Table Number Field -->
@@ -57,4 +71,22 @@
         {% if object %}Update Order{% else %}Create Order{% endif %}
     </button>
 </form>
+<script>
+    function toggleQuantityInput(checkbox) {
+        const itemId = checkbox.getAttribute('data-item-id');
+        const quantityInput = document.getElementById(`quantity_${itemId}`);
+        if (checkbox.checked) {
+            quantityInput.style.display = 'inline';
+        } else {
+            quantityInput.style.display = 'none';
+            quantityInput.value = '1'; // Reset to default value
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.form-check-input[type="checkbox"]');
+        checkboxes.forEach(checkbox => toggleQuantityInput(checkbox));
+    });
+    </script>
 {% endblock %}

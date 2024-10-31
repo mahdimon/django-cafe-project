@@ -20,6 +20,7 @@ from .views import (
     CategoryCreateView,  # Ensure this is defined in your views
     CategoryUpdateView,
     CategoryDeleteView,
+    OrderListView
 )
 
 from django.contrib.auth.views import LogoutView

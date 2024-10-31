@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from core.models import Item
-from customer.models import Order, Customer
+from customer.models import Order, Customer , OrderItem
 
 class StaffCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
@@ -86,9 +86,16 @@ class OrderCreateForm(forms.ModelForm):
 class OrderEditForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['items', 'table_number', 'status']  # Include fields that can be edited
-        widgets = {
-            'items': forms.CheckboxSelectMultiple(choices=Item.objects.all().values("name")),
-            'table_number': forms.NumberInput(attrs={'class': 'form-control'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
+        fields = ['status', 'table_number']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            # Get current order items
+            self.initial['items'] = [
+                item.id for item in self.instance.items.all()
+            ]
+            # Get current quantities
+            self.order_items = OrderItem.objects.filter(
+                order=self.instance
+            ).select_related('item')

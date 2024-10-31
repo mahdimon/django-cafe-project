@@ -12,7 +12,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from core.models import Item, Category
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseRedirect
-
+from django.db import transaction
+from django.core.exceptions import ValidationError
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
@@ -115,11 +116,7 @@ class OrderListView(LoginRequiredMixin, ListView):
         return queryset
 
 
-class OrderEditView(LoginRequiredMixin, UpdateView):
-    model = Order
-    fields = ['status', 'table_number']  # You can extend this based on your requirements
-    template_name = 'staff/order_edit.html'
-    success_url = reverse_lazy('staff:orders')
+
 
 class OrderCreateView(LoginRequiredMixin, CreateView):
     model = Order
@@ -128,48 +125,182 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['items'] = Item.objects.filter(available=True)  # Make sure to filter based on availability
+        context['items'] = Item.objects.filter(available=True)
         return context
 
     def form_valid(self, form):
-        # Save the form without committing the many-to-many field (items)
-        order = form.save(commit=False)
+        try:
+            with transaction.atomic():
+                # Create the order without saving yet
+                order = form.save(commit=False)
+                
+                # Handle customer creation/assignment
+                phone_number = form.cleaned_data.get('phone_number')
+                if phone_number:
+                    customer, created = Customer.objects.get_or_create(
+                        phone_number=phone_number
+                    )
+                    order.customer = customer
 
-        # Handle the phone number (if provided)
-        phone_number = form.cleaned_data.get('phone_number')
-        if phone_number:
-            # Create or get the customer based on the provided phone number
-            customer, created = Customer.objects.get_or_create(phone_number=phone_number)
+                # Save the order first
+                order.save()
 
-            # Create the order but don't save it yet
-            order = form.save(commit=False)
-            order.customer = customer  # Link the order to the customer
-        else:
-            # If no phone number is provided, create the order without a customer
-            order = form.save(commit=False)
+                # Get selected items and their quantities
+                selected_items = self.request.POST.getlist('items')
+                quantities = self.request.POST.getlist('quantities')
+                
+                # Filter out quantities for unselected items
+                selected_quantities = []
+                for i, item_id in enumerate(selected_items):
+                    if i < len(quantities):
+                        selected_quantities.append(quantities[i])
+                
+                # Now selected_items and selected_quantities should have the same length
+                if len(selected_items) == 0:
+                    raise ValidationError("لطفاً حداقل یک آیتم انتخاب کنید")
 
-            # Save the order to get the ID
-            order.save()
+                if len(selected_items) != len(selected_quantities):
+                    raise ValidationError(
+                        f"خطا در داده‌های ارسالی: تعداد آیتم‌ها ({len(selected_items)}) "
+                        f"و مقادیر ({len(selected_quantities)}) همخوانی ندارند"
+                    )
 
-        # Handle the many-to-many field (items) through OrderItem
-        items = self.request.POST.getlist('items')  # Get the selected items
-        quantities = self.request.POST.getlist('quantities')  # Assume you provide quantities for each item
+                # Create order items
+                order_items = []
+                for item_id, quantity in zip(selected_items, selected_quantities):
+                    try:
+                        quantity = int(quantity)
+                        if quantity <= 0:
+                            raise ValidationError(
+                                f"مقدار برای آیتم {item_id} باید بیشتر از صفر باشد"
+                            )
+                    except ValueError:
+                        raise ValidationError(
+                            f"مقدار نامعتبر برای آیتم {item_id}"
+                        )
 
-        for item_id, quantity in zip(items, quantities):
-            item = Item.objects.get(id=item_id)
-            OrderItem.objects.create(order=order, item=item, quantity=quantity)
+                    try:
+                        item = Item.objects.get(id=item_id, available=True)
+                    except Item.DoesNotExist:
+                        raise ValidationError(
+                            f"آیتم با شناسه {item_id} موجود نیست یا در دسترس نیست"
+                        )
 
-        # Save the order again to ensure everything is persisted
-        order.save()
+                    order_items.append(
+                        OrderItem(
+                            order=order,
+                            item=item,
+                            quantity=quantity
+                        )
+                    )
 
-        return redirect(reverse_lazy('staff:orders'))  # Redirect to the orders list
+                # Bulk create order items
+                OrderItem.objects.bulk_create(order_items)
+
+                return redirect(reverse_lazy('staff:orders'))
+
+        except ValidationError as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
+        except Exception as e:
+            form.add_error(None, f"خطا در ثبت سفارش: {str(e)}")
+            return self.form_invalid(form)
+
 
 class OrderEditView(LoginRequiredMixin, UpdateView):
     model = Order
-    template_name = 'staff/order_form.html'  # Reuse the same template for editing
-    form_class = OrderEditForm  # Use the custom form for editing
-    success_url = reverse_lazy('staff:orders')  # Redirect to the orders page after editing
+    template_name = 'staff/order_form.html'  
+    form_class = OrderEditForm
+    success_url = reverse_lazy('staff:orders')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['items'] = Item.objects.filter(available=True)
+        
+        # Get current order items and their quantities
+        order_items = OrderItem.objects.filter(order=self.object).select_related('item')
+        context['order_items'] = {
+            oi.item.id: oi.quantity for oi in order_items
+        }
+        return context
+
+    def form_valid(self, form):
+        try:
+            with transaction.atomic():
+                order = form.save(commit=False)
+                
+                # Handle phone number update if provided
+                phone_number = form.cleaned_data.get('phone_number')
+                if phone_number:
+                    customer, created = Customer.objects.get_or_create(
+                        phone_number=phone_number
+                    )
+                    order.customer = customer
+
+                order.save()
+
+                # Get selected items and quantities
+                selected_items = self.request.POST.getlist('items')
+                quantities = self.request.POST.getlist('quantities')
+                
+                # Filter out quantities for unselected items
+                selected_quantities = []
+                for i, item_id in enumerate(selected_items):
+                    if i < len(quantities):
+                        selected_quantities.append(quantities[i])
+
+                if len(selected_items) == 0:
+                    raise ValidationError("لطفاً حداقل یک آیتم انتخاب کنید")
+
+                if len(selected_items) != len(selected_quantities):
+                    raise ValidationError(
+                        f"خطا در داده‌های ارسالی: تعداد آیتم‌ها ({len(selected_items)}) "
+                        f"و مقادیر ({len(selected_quantities)}) همخوانی ندارند"
+                    )
+
+                # Delete existing order items
+                OrderItem.objects.filter(order=order).delete()
+
+                # Create new order items
+                order_items = []
+                for item_id, quantity in zip(selected_items, selected_quantities):
+                    try:
+                        quantity = int(quantity)
+                        if quantity <= 0:
+                            raise ValidationError(
+                                f"مقدار برای آیتم {item_id} باید بیشتر از صفر باشد"
+                            )
+                    except ValueError:
+                        raise ValidationError(
+                            f"مقدار نامعتبر برای آیتم {item_id}"
+                        )
+
+                    try:
+                        item = Item.objects.get(id=item_id, available=True)
+                    except Item.DoesNotExist:
+                        raise ValidationError(
+                            f"آیتم با شناسه {item_id} موجود نیست یا در دسترس نیست"
+                        )
+
+                    order_items.append(
+                        OrderItem(
+                            order=order,
+                            item=item,
+                            quantity=quantity
+                        )
+                    )
+
+                # Bulk create new order items
+                OrderItem.objects.bulk_create(order_items)
+
+                return redirect(self.success_url)
+
+        except ValidationError as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
+        except Exception as e:
+            form.add_error(None, f"خطا در ویرایش سفارش: {str(e)}")
+            return self.form_invalid(form)
 class OrderDeleteView(LoginRequiredMixin, DeleteView):
     model = Order
     template_name = 'staff/order_confirm_delete.html'  # Adjust the template name as needed
@@ -183,15 +314,23 @@ class ItemListView(LoginRequiredMixin, ListView):
 class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
     template_name = 'staff/item_form.html'
-    fields = ['category', 'name', 'description', 'price', 'available']
+    fields = ['category', 'name', 'description', 'price', 'available', 'image']
     success_url = reverse_lazy('staff:item_list')
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['image'].widget.attrs.update({'class': 'form-control'})  # اضافه کردن ویژگی به فیلد image
+        return form
 class ItemUpdateView(LoginRequiredMixin, UpdateView):
     model = Item
     template_name = 'staff/item_form.html'
-    fields = ['category', 'name', 'description', 'price', 'available']
+    fields = ['category', 'name', 'description', 'price', 'available', 'image']
     success_url = reverse_lazy('staff:item_list')
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['image'].widget.attrs.update({'class': 'form-control'})
+        return form
 class ItemDeleteView(LoginRequiredMixin, DeleteView):
     model = Item
     template_name = 'staff/item_confirm_delete.html'
