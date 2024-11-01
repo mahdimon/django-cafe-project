@@ -1,0 +1,225 @@
+
+/* Reset default margin for body to account for fixed navbar */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    padding-top: 70px;
+}
+
+/* Navbar styling */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #ffffff !important;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50 !important;
+}
+
+.nav-link {
+    color: #34495e !important;
+    font-weight: 500;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #e67e22 !important;
+}
+
+/* Container styling */
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: 30px;
+}
+
+/* Button styling */
+.btn {
+    padding: 8px 20px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #e67e22;
+    border-color: #e67e22;
+}
+
+.btn-primary:hover {
+    background-color: #d35400;
+    border-color: #d35400;
+}
+
+/* Card styling */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.card-text {
+    color: #7f8c8d;
+}
+
+/* Price styling */
+.price {
+    font-size: 1.2em;
+    color: #e67e22;
+    font-weight: bold;
+}
+
+/* Form controls */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #dcdde1;
+    padding: 10px 15px;
+}
+
+.form-control:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 0.2rem rgba(230,126,34,0.25);
+}
+
+
+/* Cart page title */
+.my-4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 30px !important;
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* Table styling */
+.table {
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.table thead {
+    background-color: #f8f9fa;
+}
+
+.table thead th {
+    border-bottom: 2px solid #e67e22;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 15px;
+    color: #34495e;
+    border-bottom: 1px solid #eee;
+}
+
+/* Price column */
+.table td:nth-child(2) {
+    font-weight: 600;
+    color: #e67e22;
+}
+
+/* Button styling */
+.btn-danger {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+    transform: scale(0.98);
+}
+
+.btn-success {
+    background-color: #27ae60;
+    border-color: #27ae60;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #219a52;
+    border-color: #219a52;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
+}
+
+/* Empty cart message */
+p:empty + p {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 1.2em;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table thead {
+        display: none;
+    }
+    
+    .table tbody td {
+        display: block;
+        text-align: right;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .table tbody td:before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .table tbody tr {
+        margin-bottom: 15px;
+        display: block;
+        border-bottom: 2px solid #e67e22;
+    }
+    
+    .btn-success {
+        width: 100%;
+    }
+}
+
+/* Animation for removing items */
+.table tr {
+    transition: all 0.3s ease;
+}
+
+.table tr.removing {
+    opacity: 0;
+    transform: translateX(-20px);
+}
