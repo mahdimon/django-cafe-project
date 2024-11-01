@@ -31,13 +31,14 @@ class Order(models.Model):
     items_info = models.JSONField(null=True, blank=True)
     table_number = models.PositiveIntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    order_date = models.DateTimeField(auto_now_add=True)
+    order_date = models.DateTimeField()
     price = models.DecimalField(max_digits=6, decimal_places=2,null=True,blank=True)
 
     def __str__(self):
         return f"Order {self.id} for Table {self.table_number} ({self.get_status_display()})"
 
     def save(self, *args, **kwargs):
-        
+        if not self.items_info:
+            self.items_info = list(self.items.values('name', 'category', 'description', 'price'))
         super().save(*args, **kwargs)
-        self.items_info = list(self.items.values('name', 'category', 'description', 'price'))
+        

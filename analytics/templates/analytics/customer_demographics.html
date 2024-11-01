@@ -1,0 +1,24 @@
+{% extends 'analytics/base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>Top 5 Chosen Tables</h1>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Table Number</th>
+                    <th>Order Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for table in top_tables %}
+                <tr>
+                    <td>{{ table.table_number }}</td>
+                    <td>{{ table.order_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

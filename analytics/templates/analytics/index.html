@@ -1,0 +1,41 @@
+{% extends 'analytics/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="display-4">Cafe Analytics Dashboard</h1>
+    <p class="lead">Explore key insights about your cafe's performance.</p>
+
+    <ul class="list-group">
+        <li class="list-group-item">
+            <a href="{% url 'analytics:popular_items' %}" class="btn btn-primary btn-lg btn-block">Most Popular Items</a>
+        </li>
+        <li class="list-group-item">
+            <a href="{% url 'analytics:peak_hours' %}" class="btn btn-primary btn-lg btn-block">Peak Business Hours</a>
+        </li>
+         <li class="list-group-item">
+            <a href="{% url 'analytics:customer_demographics' %}" class="btn btn-primary btn-lg btn-block">Customer Demographics</a>
+        </li>
+        <li class="list-group-item">
+            <a href="{% url 'analytics:sales' %}" class="btn btn-primary btn-lg btn-block">Sales</a>
+        </li>
+        <li class="list-group-item">
+            <a href="{% url 'analytics:order_status_report' %}" class="btn btn-primary btn-lg btn-block">Order Status Report (Day)</a>
+        </li>
+        <li class="list-group-item">
+            <a href="{% url 'analytics:customer_order_history_report' %}" class="btn btn-primary btn-lg btn-block">Customer Order History Report</a>
+        </li>
+        {% comment %}
+        <li class="list-group-item">
+            <a href="{% url 'analytics:download_sales_reports' %}" class="btn btn-primary btn-lg btn-block">Download Sales Reports</a>
+        </li>
+
+
+       
+       
+        <li class="list-group-item">
+            <a href="{% url 'analytics:sales_by_employee_report' %}" class="btn btn-primary btn-lg btn-block">Sales by Employee Report</a>
+        </li>
+ {% endcomment %}
+    </ul>
+</div>
+{% endblock %}
