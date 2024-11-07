@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> 
     {% load static %}
     <link rel="stylesheet" href="{% static 'style-s.css' %}">
-<!-- Bootstrap CSS -->
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -17,15 +16,17 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    {% if user.is_staff %}
+                
+                <!-- Only display 'Staff List' and 'Analytics' links if the user is staff -->
+                {% if user.is_staff %}
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'staff:staff_list' %}">Staff List</a>
-                    {% else %}
-                        <a class="nav-link disabled" href="#" data-bs-toggle="tooltip" data-bs-placement="bottom" title="You need staff permissions to access this page.">
-                            Staff List
-                        </a>
-                    {% endif %}
-                </li>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'analytics:index' %}">Analytics</a> <!-- Update URL to point to analytics home page -->
+                    </li>
+                {% endif %}
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'staff:orders' %}">Orders</a>
                 </li>
@@ -38,6 +39,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'staff:logout' %}">Logout</a>
                 </li>
+                {% endif %}
             </ul>
 
             <!-- User info on the right side -->
