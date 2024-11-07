@@ -4,21 +4,84 @@
     <div class="container">
         <h1>Peak Business Hours</h1>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Hour</th>
-                    <th>Order Count</th>
-                </tr>
-            </thead>
-            <tbody>
+        <!-- Canvas element for Chart.js -->
+        <canvas id="peakHoursChart" width="400" height="200"></canvas>
+
+        <!-- Chart.js Library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        {% if peak_hours|length > 10 %}
+        <!-- Chart.js Zoom Plugin (conditionally loaded if data is large) -->
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0"></script>
+        {% endif %}
+
+        <!-- JavaScript to create chart -->
+        <script>
+            // Prepare data for Chart.js
+            const labels = [
                 {% for hour in peak_hours %}
-                <tr>
-                    <td>{{ hour.hour }}:00 - {{ hour.hour|add:1 }}:00</td>
-                    <td>{{ hour.order_count }}</td>
-                </tr>
+                    "{{ hour.hour }}:00 - {{ hour.hour|add:1 }}:00",
                 {% endfor %}
-            </tbody>
-        </table>
+            ];
+
+            const orderCounts = [
+                {% for hour in peak_hours %}
+                    {{ hour.order_count }},
+                {% endfor %}
+            ];
+
+            // Initialize Chart
+            const ctx = document.getElementById('peakHoursChart').getContext('2d');
+            const peakHoursChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Order Count',
+                        data: orderCounts,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour of the Day'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Order Count'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    {% if peak_hours|length > 10 %}
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x', // Allows panning along the x-axis only
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true, // Enables zooming with mouse wheel
+                                },
+                                pinch: {
+                                    enabled: true // Enables zooming by pinch gesture
+                                },
+                                mode: 'x', // Zoom along x-axis only
+                            }
+                        }
+                    }
+                    {% endif %}
+                }
+            });
+        </script>
     </div>
 {% endblock %}

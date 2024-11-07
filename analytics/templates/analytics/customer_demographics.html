@@ -4,21 +4,87 @@
     <div class="container">
         <h1>Top 5 Chosen Tables</h1>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Table Number</th>
-                    <th>Order Count</th>
-                </tr>
-            </thead>
-            <tbody>
+        <!-- Canvas element for Chart.js -->
+        <canvas id="topTablesChart" width="400" height="200"></canvas>
+
+        <!-- Chart.js Library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        {% if top_tables|length > 5 %}
+        <!-- Chart.js Zoom Plugin (conditionally loaded if data is large) -->
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0"></script>
+        {% endif %}
+
+        <!-- JavaScript to create chart -->
+        <script>
+            // Prepare data for Chart.js
+            const labels = [
                 {% for table in top_tables %}
-                <tr>
-                    <td>{{ table.table_number }}</td>
-                    <td>{{ table.order_count }}</td>
-                </tr>
+                    {% if table.table_number %}
+                        "Table {{ table.table_number }}",
+                    {% else %}
+                        "Take Away",
+                    {% endif %}
                 {% endfor %}
-            </tbody>
-        </table>
+            ];
+
+            const orderCounts = [
+                {% for table in top_tables %}
+                    {{ table.order_count }},
+                {% endfor %}
+            ];
+
+            // Initialize Chart
+            const ctx = document.getElementById('topTablesChart').getContext('2d');
+            const topTablesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Order Count',
+                        data: orderCounts,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Table Number'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Order Count'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    {% if top_tables|length > 5 %}
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x', // Allows panning along the x-axis only
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true, // Enables zooming with mouse wheel
+                                },
+                                pinch: {
+                                    enabled: true // Enables zooming by pinch gesture
+                                },
+                                mode: 'x', // Zoom along x-axis only
+                            }
+                        }
+                    }
+                    {% endif %}
+                }
+            });
+        </script>
     </div>
 {% endblock %}
