@@ -1,10 +1,19 @@
-
+.container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    /* margin-top: 80px; برای فاصله از navbar */
+}
 /* Reset default margin for body to account for fixed navbar */
 body {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.204), rgba(255, 255, 255, 0.353)), url('/media/images/c2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fa;
 }
-
 /* Navbar styling */
 .navbar {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);

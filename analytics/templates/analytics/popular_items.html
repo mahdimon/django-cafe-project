@@ -1,32 +1,35 @@
 {% extends 'analytics/base.html' %}
 
 {% block content %}
-    <form method="post">
+    <form method="post" class="analytics-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Filter</button>
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
     </form>
 
     {% if popular_items %}
-        <h2>Most Popular Items</h2>
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Total Sold</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in popular_items %}
-                <tr>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.total_sold }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h2 class="analytics-heading">Most Popular Items</h2>
+        <div class="analytics-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Total Sold</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in popular_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.total_sold }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>No items found within the specified date range.</p>
+        <p class="no-items-message">No items found within the specified date range.</p>
     {% endif %}
 {% endblock %}
