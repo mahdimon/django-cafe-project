@@ -38,7 +38,10 @@ class Order(models.Model):
         return f"Order {self.id} for Table {self.table_number} ({self.get_status_display()})"
 
     def save(self, *args, **kwargs):
-        # if not self.items_info:
-        #     self.items_info = list(self.items.values('name', 'category', 'description', 'price'))
+        
+        is_new = self.pk is None
         super().save(*args, **kwargs)
-        self.items_info = list(self.items.values('name', 'category', 'description', 'price'))
+
+        if is_new:
+            self.items_info = list(self.items.values('name', 'category', 'description', 'price'))
+            super().save(update_fields=['items_info'])

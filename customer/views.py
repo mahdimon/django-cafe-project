@@ -29,7 +29,7 @@ class Cart(View):
             cart_cookie = request.COOKIES.get('cart', '{}')
             cart = json.loads(cart_cookie)
             return {int(key): int(value) for key, value in cart.items()}
-        except json.JSONDecodeError:
+        except :
             return {}
             
     def get(self, request):
