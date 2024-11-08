@@ -25,30 +25,35 @@ class PopularItemsView(View):
         ).order_by('-total_sold')[:5]
         return render(request, self.template_name, {'form': form, 'popular_items': popular_items})
 
-   
     def post(self, request):
         form = PopularItemsForm(request.POST)
         if form.is_valid():
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
 
-            # Check if start_date and end_date are date instances and convert them to datetime
             if start_date and isinstance(start_date, (date, datetime)):
                 start_date = datetime.combine(start_date, datetime.min.time())
             if end_date and isinstance(end_date, (date, datetime)):
                 end_date = datetime.combine(end_date, datetime.max.time())
 
-            # Make datetimes timezone-aware
             if start_date and timezone.is_naive(start_date):
                 start_date = timezone.make_aware(start_date)
             if end_date and timezone.is_naive(end_date):
                 end_date = timezone.make_aware(end_date)
 
+           
             popular_items = Item.objects.annotate(
                 total_sold=Coalesce(
                     Sum('order_items__quantity', filter=Q(order_items__order__status='completed') & 
-                                                Q(order_items__order__order_date__range=(start_date, end_date)) if start_date and end_date else 
-                                                Q(order_items__order__status='completed')),
+                                                Q(order_items__order__order_date__range=(start_date, end_date))),
+                    Value(0)
+                )
+            ).order_by('-total_sold')[:5]
+        else:
+           
+            popular_items = Item.objects.annotate(
+                total_sold=Coalesce(
+                    Sum('order_items__quantity', filter=Q(order_items__order__status='completed')),
                     Value(0)
                 )
             ).order_by('-total_sold')[:5]

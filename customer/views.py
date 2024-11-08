@@ -75,6 +75,8 @@ class Cart(View):
             
             if not customer:
                 customer, created = Customer.objects.get_or_create(phone_number=phone_number)
+                request.session.clear()
+                request.session.create()
                 request.session['customer_id'] = customer.pk
 
             

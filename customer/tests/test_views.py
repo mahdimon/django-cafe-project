@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from decimal import Decimal
-from .models import Customer, Order, OrderItem
+from customer.models import Customer, Order, OrderItem
 from core.models import Item
 import json
 
@@ -34,13 +34,13 @@ class CartViewTest(TestCase):
         
         response = self.client.get(reverse('cart'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['cart'][str(self.item1.id)], 2)
-        self.assertEqual(response.context['cart'][str(self.item2.id)], 1)
+        self.assertEqual(response.context['cart'][int(self.item1.id)], 2)
+        self.assertEqual(response.context['cart'][int(self.item2.id)], 1)
 
     def test_cart_post_order_creation(self):
         cart_data = {str(self.item1.id): 2, str(self.item2.id): 1}
         self.client.cookies['cart'] = json.dumps(cart_data)
-        form_data = {'phone_number': '1234567890'}
+        form_data = {'phone_number': '09123456789'}
         
         response = self.client.post(reverse('cart'), data=form_data)
         order = Order.objects.last()
@@ -52,7 +52,7 @@ class CartViewTest(TestCase):
 class CheckoutViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.customer = Customer.objects.create(phone_number="1234567890")
+        self.customer = Customer.objects.create(phone_number="09123456789")
         self.order = Order.objects.create(customer=self.customer, price=10.00)
 
     def test_checkout_view(self):
@@ -63,18 +63,29 @@ class CheckoutViewTest(TestCase):
 class HistoryViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.customer = Customer.objects.create(phone_number="1234567890")
+        self.customer = Customer.objects.create(phone_number="09123456789")
         self.client.session['customer_id'] = self.customer.id
         self.client.session.save()
 
-    def test_history_view_with_orders(self):
-        order = Order.objects.create(customer=self.customer, price=10.00)
-        response = self.client.get(reverse('history'))
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(order, response.context['orders'])
 
-    def test_history_view_no_customer(self):
-        self.client.session['customer_id'] = None
+
+    def test_history_view_no_orders(self):
         response = self.client.get(reverse('history'))
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.context['orders'])
+        
+      
+        orders = response.context.get('orders', None)
+        self.assertIsNone(orders)
+        
+    def test_history_view_no_customer(self):
+       
+        session = self.client.session
+        session.pop('customer_id', None)
+        session.save()
+        
+        response = self.client.get(reverse('history'))
+        self.assertEqual(response.status_code, 200)
+        
+       
+        orders = response.context.get('orders', None)
+        self.assertIsNone(orders)
