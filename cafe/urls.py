@@ -19,12 +19,14 @@ from django.contrib import admin
 from django.urls import path , include
 from django.conf import settings
 from django.conf.urls.static import static
+from decorator_include import decorator_include
+from analytics.decorators import staff_required
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('customer.urls')),
     path('staff/', include('staff.urls', namespace='staff')),
-    path('analytics/', include('analytics.urls', namespace='analytics')),
+    path('analytics/', decorator_include(staff_required, 'analytics.urls')),
 
 ]
 if settings.DEBUG:

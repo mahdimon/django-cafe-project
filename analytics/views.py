@@ -1,16 +1,21 @@
 from django.shortcuts import render
-from django.views.generic import ListView, FormView,View
+from django.views.generic import ListView, FormView, View
 from core.models import Item, Category
-from customer.models import OrderItem, Order,Customer
+from customer.models import OrderItem, Order, Customer
 from django.db.models import Sum, Q, Count, Value, OuterRef, Subquery, FloatField
 from django.db.models.functions import ExtractHour, Coalesce, TruncDay, TruncMonth, TruncYear, Cast
-from .forms import SalesReportForm, PopularItemsForm , DateSelectionForm
+from .forms import SalesReportForm, PopularItemsForm, DateSelectionForm
 from django.utils import timezone
-from datetime import datetime , date
+from datetime import datetime, date
+import csv
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+
 
 def index(request):
     context = {}
     return render(request, 'analytics/index.html', context)
+
 
 class PopularItemsView(View):
     template_name = 'analytics/popular_items.html'
@@ -19,26 +24,24 @@ class PopularItemsView(View):
         form = PopularItemsForm()
         popular_items = Item.objects.annotate(
             total_sold=Coalesce(
-                Sum('order_items__quantity', filter=Q(order_items__order__status='completed')),
+                Sum('order_items__quantity', filter=Q(
+                    order_items__order__status='completed')),
                 Value(0)
             )
         ).order_by('-total_sold')[:5]
         return render(request, self.template_name, {'form': form, 'popular_items': popular_items})
 
-   
     def post(self, request):
         form = PopularItemsForm(request.POST)
         if form.is_valid():
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
 
-            # Check if start_date and end_date are date instances and convert them to datetime
             if start_date and isinstance(start_date, (date, datetime)):
                 start_date = datetime.combine(start_date, datetime.min.time())
             if end_date and isinstance(end_date, (date, datetime)):
                 end_date = datetime.combine(end_date, datetime.max.time())
 
-            # Make datetimes timezone-aware
             if start_date and timezone.is_naive(start_date):
                 start_date = timezone.make_aware(start_date)
             if end_date and timezone.is_naive(end_date):
@@ -46,14 +49,23 @@ class PopularItemsView(View):
 
             popular_items = Item.objects.annotate(
                 total_sold=Coalesce(
-                    Sum('order_items__quantity', filter=Q(order_items__order__status='completed') & 
-                                                Q(order_items__order__order_date__range=(start_date, end_date)) if start_date and end_date else 
-                                                Q(order_items__order__status='completed')),
+                    Sum('order_items__quantity', filter=Q(order_items__order__status='completed') &
+                        Q(order_items__order__order_date__range=(start_date, end_date))),
+                    Value(0)
+                )
+            ).order_by('-total_sold')[:5]
+        else:
+
+            popular_items = Item.objects.annotate(
+                total_sold=Coalesce(
+                    Sum('order_items__quantity', filter=Q(
+                        order_items__order__status='completed')),
                     Value(0)
                 )
             ).order_by('-total_sold')[:5]
 
         return render(request, self.template_name, {'form': form, 'popular_items': popular_items})
+
 
 class PeakHoursView(ListView):
     template_name = 'analytics/peak_hours.html'
@@ -65,7 +77,7 @@ class PeakHoursView(ListView):
             hour=ExtractHour('order_date')
         ).values('hour').annotate(
             order_count=Count('id')
-        ).order_by('-order_count')[:5]
+        ).order_by('hour')
         return peak_hours
 
 
@@ -78,8 +90,6 @@ class CustomerDemographicsView(ListView):
             order_count=Count('id')
         ).order_by('-order_count')[:5]
         return top_tables
-
-
 
 
 class SalesReportView(FormView):
@@ -102,38 +112,107 @@ class SalesReportView(FormView):
 
         if time_frame == 'total':
             sales_data = queryset.aggregate(total_sales=Sum('price'))
-            sales_data = [{'total_sales': sales_data['total_sales']}]
-            
-           
+            sales_data = sales_data['total_sales']
+
         elif time_frame == 'monthly':
             sales_data = (
                 queryset
-                .annotate(month=TruncMonth('order_date')) 
-                .values('month')  
+                .annotate(month=TruncMonth('order_date'))
+                .values('month')
                 .annotate(total_sales=Sum('price'))
-                .order_by('month')  
+                .order_by('month')
             )
         elif time_frame == 'daily':
             sales_data = (
                 queryset
-                .annotate(day=TruncDay('order_date')) 
-                .values('day') 
-                .annotate(total_sales=Sum('price')) 
+                .annotate(day=TruncDay('order_date'))
+                .values('day')
+                .annotate(total_sales=Sum('price'))
                 .order_by('day')
             )
         elif time_frame == 'yearly':
             sales_data = (
                 queryset
-                .annotate(year=TruncYear('order_date')) 
-                .values('year')  
-                .annotate(total_sales=Sum('price')) 
-                .order_by('year') 
+                .annotate(year=TruncYear('order_date'))
+                .values('year')
+                .annotate(total_sales=Sum('price'))
+                .order_by('year')
             )
 
-      
-        context = self.get_context_data(form=form, sales_data=sales_data, time_frame=time_frame)
+        context = self.get_context_data(
+            form=form, sales_data=sales_data, time_frame=time_frame)
         return self.render_to_response(context)
-        
+
+class SalesReportCSVView(View):
+    def get(self, request, *args, **kwargs):
+        # Instantiate the form with GET parameters
+        form = SalesReportForm(request.GET)
+
+        # Check if the form is valid
+        if form.is_valid():
+            # Get cleaned data from form
+            category = form.cleaned_data.get('category')
+            customer = form.cleaned_data.get('customer')
+            time_of_day = form.cleaned_data.get('time_of_day')
+            time_frame = form.cleaned_data.get('time_frame')
+
+            queryset = Order.objects.all()
+
+            # Apply filters based on form data, only if the field is not None
+            if category:
+                queryset = queryset.filter(items__category=category)
+            if customer:
+                queryset = queryset.filter(customer=customer)
+            if time_of_day is not None:
+                queryset = queryset.filter(order_date__hour=time_of_day)
+
+            # Apply time frame grouping
+            if time_frame == 'total':
+                sales_data = queryset.aggregate(total_sales=Sum('price'))['total_sales']
+                csv_data = [('Total Sales', sales_data)]
+            elif time_frame == 'monthly':
+                sales_data = (
+                    queryset
+                    .annotate(month=TruncMonth('order_date'))
+                    .values('month')
+                    .annotate(total_sales=Sum('price'))
+                    .order_by('month')
+                )
+                csv_data = [('Month', 'Total Sales')] + [(data['month'], data['total_sales']) for data in sales_data]
+            elif time_frame == 'daily':
+                sales_data = (
+                    queryset
+                    .annotate(day=TruncDay('order_date'))
+                    .values('day')
+                    .annotate(total_sales=Sum('price'))
+                    .order_by('day')
+                )
+                csv_data = [('Day', 'Total Sales')] + [(data['day'], data['total_sales']) for data in sales_data]
+            elif time_frame == 'yearly':
+                sales_data = (
+                    queryset
+                    .annotate(year=TruncYear('order_date'))
+                    .values('year')
+                    .annotate(total_sales=Sum('price'))
+                    .order_by('year')
+                )
+                csv_data = [('Year', 'Total Sales')] + [(data['year'], data['total_sales']) for data in sales_data]
+
+            # Create the CSV response
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
+
+            writer = csv.writer(response)
+            for row in csv_data:
+                writer.writerow(row)
+
+            return response
+
+        else:
+            # If the form is not valid, show errors
+            return render(request, 'analytics/sales_report.html', {'form': form})
+
+
 class OrderStatusesByDateView(View):
     template_name = 'analytics/today_orders.html'
 
@@ -157,7 +236,8 @@ class OrderStatusesByDateView(View):
 
     def get_order_statuses(self, selected_date):
         return Order.objects.filter(order_date__date=selected_date).values('status').annotate(count=Count('id'))
-    
+
+
 class CustomerOrderHistoryView(ListView):
     template_name = 'analytics/customer_order_history.html'
     context_object_name = 'orders'
@@ -165,7 +245,8 @@ class CustomerOrderHistoryView(ListView):
     def get_queryset(self):
         phone_number = self.request.GET.get('phone_number')
         if phone_number:
-            customer = Customer.objects.filter(phone_number=phone_number).first()
+            customer = Customer.objects.filter(
+                phone_number=phone_number).first()
             if customer:
                 return Order.objects.filter(customer=customer).order_by("-order_date")
         return []

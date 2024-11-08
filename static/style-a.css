@@ -1,0 +1,516 @@
+
+.container {
+    padding: 20px;
+    border-radius: 10px;
+}
+/* Reset default margin for body to account for fixed navbar */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.204), rgba(255, 255, 255, 0.353)), url('/media/images/c1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Navbar styling */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #ffffff !important;
+    padding: 15px 20px;
+}
+
+.navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50 !important;
+}
+
+.nav-link {
+    color: #34495e !important;
+    font-weight: 500;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #e67e22 !important;
+}
+
+/* Container styling */
+.container {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: 30px;
+}
+
+/* Button styling */
+.btn {
+    padding: 8px 20px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #e67e22;
+    border-color: #e67e22;
+}
+
+.btn-primary:hover {
+    background-color: #d35400;
+    border-color: #d35400;
+}
+
+/* Card styling */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.card-text {
+    color: #7f8c8d;
+}
+
+/* Price styling */
+.price {
+    font-size: 1.2em;
+    color: #e67e22;
+    font-weight: bold;
+}
+
+/* Form controls */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #dcdde1;
+    padding: 10px 15px;
+}
+
+.form-control:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 0.2rem rgba(230,126,34,0.25);
+}
+
+
+/* Cart page title */
+.my-4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 30px !important;
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* Table styling */
+.table {
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.table thead {
+    background-color: #f8f9fa;
+}
+
+.table thead th {
+    border-bottom: 2px solid #e67e22;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 15px;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 15px;
+    color: #34495e;
+    border-bottom: 1px solid #eee;
+}
+
+/* Price column */
+.table td:nth-child(2) {
+    font-weight: 600;
+    color: #e67e22;
+}
+
+/* Button styling */
+.btn-danger {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+    transform: scale(0.98);
+}
+
+.btn-success {
+    background-color: #27ae60;
+    border-color: #27ae60;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #219a52;
+    border-color: #219a52;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
+}
+
+/* Empty cart message */
+p:empty + p {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 1.2em;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table thead {
+        display: none;
+    }
+    
+    .table tbody td {
+        display: block;
+        text-align: right;
+        padding: 10px;
+        position: relative;
+    }
+    
+    .table tbody td:before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .table tbody tr {
+        margin-bottom: 15px;
+        display: block;
+        border-bottom: 2px solid #e67e22;
+    }
+    
+    .btn-success {
+        width: 100%;
+    }
+}
+
+/* Animation for removing items */
+.table tr {
+    transition: all 0.3s ease;
+}
+
+.table tr.removing {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+/* Add these styles to your style-c.css file */
+
+/* Form styling */
+.analytics-form {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 2rem;
+}
+
+.analytics-form label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.analytics-form .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.analytics-form button {
+    background-color: #fd8d0d;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+}
+
+.analytics-form button:hover {
+    background-color: #d76e0b;
+}
+
+/* Table styling */
+.analytics-table {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.analytics-table .table {
+    margin-bottom: 0;
+}
+
+.analytics-table thead {
+    background-color: #f8f9fa;
+}
+
+.analytics-table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    padding: 1rem;
+}
+
+.analytics-table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.analytics-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Section heading */
+.analytics-heading {
+    color: #212529;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* No items message */
+.no-items-message {
+    text-align: center;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    color: #6c757d;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .analytics-form {
+        padding: 1rem;
+    }
+    
+    .analytics-table th,
+    .analytics-table td {
+        padding: 0.75rem;
+    }
+}
+form {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left : 10px;
+    border-radius: 8px;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+/* سبک پایه برای ظاهر جدول */
+.table-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.table {
+    width: 90%;
+    max-width: 1200px;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-collapse: collapse;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #4CAF50, #2e7d32);
+    color: white;
+}
+
+.table th,
+.table td {
+    padding: 15px 20px;
+    text-align: left;
+}
+
+.table th {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.table tbody tr {
+    transition: background-color 0.3s;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.table tbody tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+    background-color: #e0f7fa;
+}
+
+.table tbody td {
+    font-size: 16px;
+    color: #555;
+    border-bottom: 1px solid #ddd;
+}
+
+/* استایل برای ستون جمع کل فروش */
+.table tbody td:last-child {
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+/* استایل برای زمان‌بندی جدول */
+.table tbody td:first-child {
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+/* نسخه ریسپانسیو برای موبایل */
+@media (max-width: 768px) {
+    .table-container {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    .table, .table thead, .table tbody, .table th, .table td, .table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .table thead tr {
+        display: none; /* حذف سرستون‌ها برای نمایش موبایل */
+    }
+
+    .table tbody tr {
+        margin-bottom: 15px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .table td {
+        padding: 12px;
+        position: relative;
+        text-align: right;
+        border: none;
+        border-bottom: 1px solid #f2f2f2;
+    }
+
+    .table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 15px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* حذف خط آخر هر ردیف */
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+}
+form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+}
+
+form label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+form select {
+    padding: 8px 12px;
+    border: 1px solid #d35400;
+    border-radius: 5px;
+    background-color: #f9e5d3;
+    color: #333;
+    font-size: 14px;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+form select:hover, form select:focus {
+    border-color: #e67e22;
+    outline: none;
+    background-color: #fad7a0;
+}
+
+form input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #d35400;
+    border-radius: 5px;
+    background-color: #f9e5d3;
+    color: #333;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+form input[type="text"]:hover, form input[type="text"]:focus {
+    border-color: #e67e22;
+    outline: none;
+    background-color: #fad7a0;
+}
+
+@media (max-width: 768px) {
+    form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+}

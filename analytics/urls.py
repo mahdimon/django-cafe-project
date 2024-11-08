@@ -14,4 +14,5 @@ urlpatterns = [
     path('order_status_report/', views.OrderStatusesByDateView.as_view(), name='order_status_report'),
 #     path('sales_by_employee_report/', views.sales_by_employee_report, name='sales_by_employee_report'),
     path('customer_order_history_report/', views.CustomerOrderHistoryView.as_view(), name='customer_order_history_report'),
+    path('sales-report/csv/', views.SalesReportCSVView.as_view(), name='sales_report_csv'),
  ]

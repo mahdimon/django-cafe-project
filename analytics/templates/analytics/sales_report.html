@@ -1,6 +1,4 @@
- 
-
-{% extends 'analytics/base.html' %}
+{% extends 'base-a.html' %}
 
 {% block content %}
     <h2>Sales Report</h2>
@@ -14,38 +12,108 @@
     {% if sales_data %}
         <h3>Sales Report - {{ time_frame|capfirst }}</h3>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    {% if time_frame == 'monthly' %}
-                        <th>Month</th>
-                    {% elif time_frame == 'daily' %}
-                        <th>Day</th>
-                    {% elif time_frame == 'yearly' %}
-                        <th>Year</th>
-                    
-                    {% endif %}
-                    <th>Total Sales</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for data in sales_data %}
-                    <tr>
+        {% if time_frame == "total" %}
+            <!-- Show the total sales line if time_frame is "total" -->
+            <p><strong>Total Sales: ${{ sales_data}}</strong></p>
+        {% else %}
+            <!-- Canvas element for Chart.js -->
+            <canvas id="salesChart" width="400" height="200"></canvas>
+
+            <!-- Chart.js Library -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+            {% if sales_data|length > 10 %}
+            <!-- Chart.js Zoom Plugin (conditionally loaded if data is large) -->
+            <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.0.0"></script>
+            {% endif %}
+
+            <!-- JavaScript to create chart -->
+            <script>
+                // Process data for Chart.js
+                const labels = [
+                    {% for data in sales_data %}
                         {% if time_frame == 'monthly' %}
-                            <td>{{ data.month|date:"F Y" }}</td>
+                            "{{ data.month|date:'F Y' }}",
                         {% elif time_frame == 'daily' %}
-                            <td>{{ data.day|date:"F d, Y" }}</td>
+                            "{{ data.day|date:'F d, Y' }}",
                         {% elif time_frame == 'yearly' %}
-                            <td>{{ data.year|date:'Y' }}</td>
+                            "{{ data.year|date:'Y' }}",
                         {% endif %}
-                        <td>${{ data.total_sales }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                ];
+
+                const salesData = [
+                    {% for data in sales_data %}
+                        {{ data.total_sales }},
+                    {% endfor %}
+                ];
+
+                // Create chart
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                const salesChart = new Chart(ctx, {
+                    type: 'line', // Type of chart: 'line' for a line chart
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Sales',
+                            data: salesData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '{{ time_frame|capfirst }}'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Total Sales ($)'
+                                },
+                                beginAtZero: true
+                            }
+                        },
+                        {% if sales_data|length > 10 %}
+                        plugins: {
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x', // Allows panning only along the x-axis
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true, // Enable zooming with the mouse wheel
+                                    },
+                                    pinch: {
+                                        enabled: true // Enable zooming by pinch gesture on touch devices
+                                    },
+                                    mode: 'x', // Allows zooming only along the x-axis
+                                }
+                            }
+                        }
+                        {% endif %}
+                    }
+                });
+            </script>
+        {% endif %}
+        <form method="get" action="{% url 'analytics:sales_report_csv' %}">
+           
+            <input type="hidden" name="category" value="{{ form.category.value }}">
+            <input type="hidden" name="customer" value="{{ form.customer.value }}">
+            <input type="hidden" name="time_of_day" value="{{ form.time_of_day.value }}">
+            <input type="hidden" name="time_frame" value="{{ form.time_frame.value }}">
+        
+            <button type="submit">Download CSV</button>
+        </form>
+
+        
     {% else %}
         <p>No data available for the selected criteria.</p>
     {% endif %}
-{% endblock %} 
-
-
+{% endblock %}

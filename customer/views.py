@@ -29,7 +29,7 @@ class Cart(View):
             cart_cookie = request.COOKIES.get('cart', '{}')
             cart = json.loads(cart_cookie)
             return {int(key): int(value) for key, value in cart.items()}
-        except json.JSONDecodeError:
+        except :
             return {}
             
     def get(self, request):
@@ -62,7 +62,7 @@ class Cart(View):
                 messages.error(request, "سبد خرید شما خالی است")
                 return self.get(request)
 
-            # Get or create customer
+           
             phone_number = form.cleaned_data.get('phone_number')
             customer_id = request.session.get('customer_id')
             
@@ -75,15 +75,17 @@ class Cart(View):
             
             if not customer:
                 customer, created = Customer.objects.get_or_create(phone_number=phone_number)
+                request.session.clear()
+                request.session.create()
                 request.session['customer_id'] = customer.pk
 
-            # Create order
+            
             order = Order.objects.create(
                 customer=customer,
                 price=Decimal('0.00')
             )
 
-            # Add items to order
+           
             total_price = Decimal('0.00')
             for item_id, quantity in cart.items():
                 try:
@@ -112,6 +114,7 @@ class Cart(View):
         except Exception as e:
             messages.error(request, "خطا در ثبت سفارش")
             return self.get(request)
+
 def checkout(request,order_id):
     return render(request,"customer/checkout.html",{'order_id':order_id})
 
