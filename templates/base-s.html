@@ -16,11 +16,6 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
-                
-                <!-- Only display 'Staff List' and 'Analytics' links if the user is staff -->
-                {% if user.is_staff %}
-                    <li class="nav-item">
-                
                 <!-- Only display 'Staff List' and 'Analytics' links if the user is staff -->
                 {% if user.is_staff %}
                     <li class="nav-item">
@@ -43,7 +38,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'staff:logout' %}">Logout</a>
                 </li>
-                {% endif %}
                 {% endif %}
             </ul>
 

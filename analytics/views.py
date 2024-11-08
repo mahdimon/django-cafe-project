@@ -145,12 +145,12 @@ class SalesReportView(FormView):
 
 class SalesReportCSVView(View):
     def get(self, request, *args, **kwargs):
-        # Instantiate the form with GET parameters
+      
         form = SalesReportForm(request.GET)
 
-        # Check if the form is valid
+   
         if form.is_valid():
-            # Get cleaned data from form
+          
             category = form.cleaned_data.get('category')
             customer = form.cleaned_data.get('customer')
             time_of_day = form.cleaned_data.get('time_of_day')
@@ -158,7 +158,7 @@ class SalesReportCSVView(View):
 
             queryset = Order.objects.all()
 
-            # Apply filters based on form data, only if the field is not None
+            
             if category:
                 queryset = queryset.filter(items__category=category)
             if customer:
@@ -197,8 +197,7 @@ class SalesReportCSVView(View):
                     .order_by('year')
                 )
                 csv_data = [('Year', 'Total Sales')] + [(data['year'], data['total_sales']) for data in sales_data]
-
-            # Create the CSV response
+       
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
 
